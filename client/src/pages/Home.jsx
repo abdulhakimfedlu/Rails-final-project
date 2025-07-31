@@ -70,22 +70,6 @@ const Home = () => {
     }
   }, [])
 
-  useEffect(() => {
-    const testimonialInterval = setInterval(() => {
-      setCurrentTestimonial(prev => (prev + 1) % testimonials.length)
-    }, 5000)
-
-    return () => clearInterval(testimonialInterval)
-  }, [testimonials.length])
-
-  useEffect(() => {
-    const stepInterval = setInterval(() => {
-      setActiveStep(prev => (prev + 1) % coffeeSteps.length)
-    }, 3000)
-
-    return () => clearInterval(stepInterval)
-  }, [coffeeSteps.length])
-
   const testimonials = [
     {
       text: 'The aroma alone transported me to the Ethiopian highlands. This coffee is pure poetry in a cup.',
@@ -148,6 +132,22 @@ const Home = () => {
         'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop',
     },
   ]
+
+  useEffect(() => {
+    const testimonialInterval = setInterval(() => {
+      setCurrentTestimonial(prev => (prev + 1) % testimonials.length)
+    }, 5000)
+
+    return () => clearInterval(testimonialInterval)
+  }, [testimonials.length])
+
+  useEffect(() => {
+    const stepInterval = setInterval(() => {
+      setActiveStep(prev => (prev + 1) % coffeeSteps.length)
+    }, 3000)
+
+    return () => clearInterval(stepInterval)
+  }, [coffeeSteps.length])
 
   const FloatingBean = ({ bean }) => (
     <div
