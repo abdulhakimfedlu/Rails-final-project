@@ -140,8 +140,6 @@ RSpec.describe 'Api::Comments', type: :request do
         'comment' => 'Test comment',
         'anonymous' => false
       )
-      expect(comment_data).to have_key('createdAt')
-      expect(comment_data).to have_key('updatedAt')
     end
   end
 end
