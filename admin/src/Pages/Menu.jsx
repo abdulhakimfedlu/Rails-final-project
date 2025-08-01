@@ -281,13 +281,60 @@ const Menu = () => {
               Manage your menu categories and items
             </p>
           </div>
-          <button
-            onClick={() => openCatModal('add')}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg shadow-md text-white bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Category
-          </button>
+          <div className="flex flex-row gap-3 items-center">
+            
+            <div className="flex flex-row gap-2 bg-white rounded-lg shadow-md p-1.5 border border-gray-100">
+              <button
+                onClick={() => openCatModal('add')}
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-md text-white bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200 whitespace-nowrap"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Category
+              </button>
+              <button
+                onClick={() =>
+                  openCatModal(
+                    'edit',
+                    categories.find(c => c._id === selectedCategory)
+                  )
+                }
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-200 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-pink-500 transition-all duration-200 whitespace-nowrap"
+                disabled={!selectedCategory}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </button>
+              
+              <button
+                onClick={async () => {
+                  if (
+                    window.confirm(
+                      'Are you sure you want to delete this category?'
+                    )
+                  ) {
+                    setCatActionLoading(true)
+                    try {
+                      await deleteCategory(selectedCategory)
+                      setCatActionMsg('Category deleted successfully!')
+                    } catch (error) {
+                      console.error('Category delete error:', error)
+                      setCatActionMsg(
+                        error.message || 'Error deleting category'
+                      )
+                    } finally {
+                      setCatActionLoading(false)
+                      setTimeout(() => setCatActionMsg(''), 3000)
+                    }
+                  }
+                }}
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 transition-all duration-200 whitespace-nowrap"
+                disabled={!selectedCategory}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
         {/* Category Tabs */}
         <div className="mb-6 sm:mb-8 bg-gradient-to-br from-gray-50 via-white to-pink-50 pt-2 pb-2">
@@ -379,56 +426,6 @@ const Menu = () => {
                 {categories.find(cat => cat._id === selectedCategory)?.name ||
                   'Select a Category'}
               </h2>
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="flex flex-row gap-2 bg-white rounded-lg shadow-md p-2 sm:p-3 border border-gray-100">
-                  <button
-                    onClick={() => openCatModal('add')}
-                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add
-                  </button>
-                  <button
-                    onClick={() =>
-                      openCatModal(
-                        'edit',
-                        categories.find(c => c._id === selectedCategory)
-                      )
-                    }
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (
-                        window.confirm(
-                          'Are you sure you want to delete this category?'
-                        )
-                      ) {
-                        setCatActionLoading(true)
-                        try {
-                          await deleteCategory(selectedCategory)
-                          setCatActionMsg('Category deleted successfully!')
-                        } catch (error) {
-                          console.error('Category delete error:', error)
-                          setCatActionMsg(
-                            error.message || 'Error deleting category'
-                          )
-                        } finally {
-                          setCatActionLoading(false)
-                          setTimeout(() => setCatActionMsg(''), 3000)
-                        }
-                      }
-                    }}
-                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-semibold rounded-md shadow-sm text-white bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </button>
-                </div>
-              </div>
             </div>
           )}
           {/* Menu Items Grid */}
