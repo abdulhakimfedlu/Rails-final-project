@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import useMenuStore from '../stores/menuStore'
 
@@ -12,6 +12,9 @@ const OutOfStock = () => {
   const [error, setError] = useState(null)
   const [updatingId, setUpdatingId] = useState(null)
   const [statusMsg, setStatusMsg] = useState('')
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [itemToUpdate, setItemToUpdate] = useState(null)
+  const modalRef = useRef()
 
   useEffect(() => {
     const fetchOutOfStock = async () => {
@@ -41,13 +44,22 @@ const OutOfStock = () => {
     fetchOutOfStock()
   }, [])
 
-  const toggleStockStatus = async (item) => {
+  const handleConfirmClick = (item) => {
+    setItemToUpdate(item)
+    setShowConfirmModal(true)
+  }
+
+  const handleConfirmToggle = async () => {
+    if (!itemToUpdate) return
+    
+    setShowConfirmModal(false)
+    
     try {
-      setUpdatingId(item._id)
+      setUpdatingId(itemToUpdate._id)
       setStatusMsg('')
       
       // Toggle the outOfStock status
-      const updatedItem = { ...item, outOfStock: !item.outOfStock }
+      const updatedItem = { ...itemToUpdate, outOfStock: !itemToUpdate.outOfStock }
       const formData = new FormData()
       Object.entries(updatedItem).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
@@ -55,18 +67,18 @@ const OutOfStock = () => {
         }
       })
       
-      await updateMenuItem(item._id, formData)
+      await updateMenuItem(itemToUpdate._id, formData)
       
       // Update local state to reflect the change
       const updatedItems = { ...outOfStockItems }
       Object.keys(updatedItems).forEach(categoryId => {
         updatedItems[categoryId] = updatedItems[categoryId].filter(
-          i => i._id !== item._id
+          i => i._id !== itemToUpdate._id
         )
       })
       
       setOutOfStockItems(updatedItems)
-      setStatusMsg(`"${item.name}" marked as ${updatedItem.outOfStock ? 'out of stock' : 'in stock'}`)
+      setStatusMsg(`"${itemToUpdate.name}" marked as ${updatedItem.outOfStock ? 'out of stock' : 'in stock'}`)
       
       // Clear status message after 3 seconds
       setTimeout(() => {
@@ -134,7 +146,7 @@ const OutOfStock = () => {
                   />
                 )}
                 <button
-                  onClick={() => toggleStockStatus(item)}
+                  onClick={() => handleConfirmClick(item)}
                   disabled={updatingId === item._id}
                   className={`absolute top-2 right-2 px-2 py-1 rounded text-xs sm:text-sm ${
                     item.outOfStock 
@@ -158,6 +170,41 @@ const OutOfStock = () => {
       {statusMsg && (
         <div className="fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
           {statusMsg}
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && itemToUpdate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div 
+            ref={modalRef}
+            className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
+          >
+            <h3 className="text-lg font-semibold mb-4">
+              Confirm Status Change
+            </h3>
+            <p className="mb-6">
+              Are you sure you want to mark "{itemToUpdate.name}" as {itemToUpdate.outOfStock ? 'IN STOCK' : 'OUT OF STOCK'}?
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmToggle}
+                className={`px-4 py-2 text-white rounded ${
+                  itemToUpdate.outOfStock 
+                    ? 'bg-green-600 hover:bg-green-700' 
+                    : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
