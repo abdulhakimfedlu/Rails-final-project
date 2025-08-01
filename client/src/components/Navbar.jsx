@@ -61,7 +61,7 @@ const Navbar = () => {
               >
                 <div className="relative flex items-center">
                   <img
-                    src="/images.png"
+                    src="/image.png"
                     alt="Akaka Coffee Logo"
                     className="h-12 w-12 rounded-2xl shadow-2xl object-cover"
                   />
