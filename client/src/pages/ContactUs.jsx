@@ -16,21 +16,6 @@ const workingHours = [
 const ContactUs = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 relative overflow-hidden">
-      {/* Coffee Steam Animation */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-t from-amber-200/40 to-transparent rounded-full blur-2xl animate-pulse"></div>
-        <div className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-t from-orange-200/40 to-transparent rounded-full blur-2xl animate-pulse delay-700"></div>
-        <div className="absolute bottom-20 left-20 w-40 h-40 bg-gradient-to-t from-yellow-200/40 to-transparent rounded-full blur-2xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-10 right-10 w-28 h-28 bg-gradient-to-t from-amber-300/40 to-transparent rounded-full blur-2xl animate-pulse delay-300"></div>
-      </div>
-
-      {/* Coffee Bean Pattern */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-3 h-6 bg-amber-800 rounded-full transform rotate-12 animate-bounce delay-500"></div>
-        <div className="absolute top-1/3 right-1/3 w-2 h-4 bg-orange-800 rounded-full transform -rotate-12 animate-bounce delay-1000"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-2.5 h-5 bg-yellow-800 rounded-full transform rotate-45 animate-bounce delay-1500"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-2 h-4 bg-amber-900 rounded-full transform -rotate-45 animate-bounce delay-2000"></div>
-      </div>
 
       <div className="relative z-10 min-h-screen px-4 py-8 sm:py-12 lg:py-20 pt-20 sm:pt-12 lg:pt-20">
         {/* Header Section */}
