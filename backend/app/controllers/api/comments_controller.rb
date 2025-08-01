@@ -10,11 +10,7 @@ class Api::CommentsController < ApplicationController
 
     # Validation: if not anonymous, name and phone are required
     if !anonymous && (name.blank? || phone.blank?)
-      render json: { 
-        success: false, 
-        message: 'Name and phone are required if not anonymous.' 
-      }, status: :bad_request
-      return
+      return render_error('Name and phone are required if not anonymous.')
     end
 
     # For anonymous comments, clear name and phone
@@ -31,69 +27,15 @@ class Api::CommentsController < ApplicationController
     )
 
     if new_comment.save
-      formatted_comment = {
-        _id: new_comment.id,
-        name: new_comment.name,
-        phone: new_comment.phone,
-        comment: new_comment.comment,
-        anonymous: new_comment.anonymous
-      }
-      render json: { 
-        success: true, 
-        message: 'Comment submitted successfully', 
-        comment: formatted_comment 
-      }, status: :created
+      render_success({ comment: format_comment(new_comment) }, 'Comment submitted successfully', :created)
     else
-      render json: { 
-        success: false, 
-        message: 'Failed to submit comment', 
-        error: new_comment.errors.full_messages.join(', ')
-      }, status: :internal_server_error
+      render_error('Failed to submit comment', :unprocessable_entity, new_comment.errors.full_messages)
     end
-  rescue => error
-    render json: { 
-      success: false, 
-      message: 'Failed to submit comment', 
-      error: error.message 
-    }, status: :internal_server_error
   end
 
   # Get all comments
   def index
-    comments = Comment.order(created_at: :desc).map do |comment|
-      {
-        _id: comment.id,
-        name: comment.name,
-        phone: comment.phone,
-        comment: comment.comment,
-        anonymous: comment.anonymous
-      }
-    end
-    render json: { success: true, comments: comments }, status: :ok
-  rescue => error
-    render json: { 
-      success: false, 
-      message: 'Failed to fetch comments', 
-      error: error.message 
-    }, status: :internal_server_error
-  end
-
-  private
-
-  # Authentication middleware
-  def authenticate_user
-    token = request.headers['Authorization']&.split(' ')&.last
-    
-    if token.blank?
-      render json: { message: 'Access token required.' }, status: :unauthorized
-      return
-    end
-
-    begin
-      decoded_token = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
-      @current_user_id = decoded_token[0]['id']
-    rescue JWT::DecodeError
-      render json: { message: 'Invalid token.' }, status: :unauthorized
-    end
+    comments = Comment.order(created_at: :desc).map { |comment| format_comment(comment) }
+    render_success({ comments: comments })
   end
 end

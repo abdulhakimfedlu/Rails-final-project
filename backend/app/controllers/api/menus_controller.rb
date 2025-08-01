@@ -3,12 +3,7 @@ class Api::MenusController < ApplicationController
   
   # Update a menu item
   def update
-    menu = Menu.find_by(id: params[:id])
-    
-    if menu.nil?
-      render json: { message: 'Menu item not found' }, status: :not_found
-      return
-    end
+    menu = Menu.find(params[:id])
 
     image_url = params[:image]
     
@@ -45,18 +40,7 @@ class Api::MenusController < ApplicationController
     end
 
     if menu.update(update_data.compact)
-      formatted_menu = {
-        _id: menu.id,
-        name: menu.name,
-        ingredients: menu.ingredients,
-        price: menu.price.to_f,
-        image: menu.image,
-        available: menu.available,
-        outOfStock: menu.out_of_stock,
-        badge: menu.badge,
-        category_id: menu.category_id
-      }
-      render json: formatted_menu
+      render json: format_menu(menu)
     else
       render json: { errors: menu.errors }, status: :unprocessable_entity
     end
@@ -64,33 +48,15 @@ class Api::MenusController < ApplicationController
 
   # Delete a menu item
   def destroy
-    menu = Menu.find_by(id: params[:id])
-    
-    if menu.nil?
-      render json: { message: 'Menu item not found' }, status: :not_found
-      return
-    end
-
+    menu = Menu.find(params[:id])
     menu.destroy
-    render json: { message: 'Menu item deleted' }
+    render_success({}, 'Menu item deleted')
   end
 
   # Get all menu items by category
   def by_category
     menus = Menu.where(category_id: params[:category_id])
-    formatted_menus = menus.map do |menu|
-      {
-        _id: menu.id,
-        name: menu.name,
-        ingredients: menu.ingredients,
-        price: menu.price,
-        image: menu.image,
-        available: menu.available,
-        outOfStock: menu.out_of_stock,
-        badge: menu.badge,
-        category_id: menu.category_id
-      }
-    end
+    formatted_menus = menus.map { |menu| format_menu(menu) }
     render json: formatted_menus
   end
 
@@ -117,39 +83,11 @@ class Api::MenusController < ApplicationController
     )
 
     if menu.save
-      formatted_menu = {
-        _id: menu.id,
-        name: menu.name,
-        ingredients: menu.ingredients,
-        price: menu.price,
-        image: menu.image,
-        available: menu.available,
-        outOfStock: menu.out_of_stock,
-        badge: menu.badge,
-        category_id: menu.category_id
-      }
-      render json: formatted_menu, status: :created
+      render json: format_menu(menu), status: :created
     else
       render json: { errors: menu.errors }, status: :unprocessable_entity
     end
   end
 
-  private
 
-  # Authentication middleware
-  def authenticate_user
-    token = request.headers['Authorization']&.split(' ')&.last
-    
-    if token.blank?
-      render json: { message: 'Access token required.' }, status: :unauthorized
-      return
-    end
-
-    begin
-      decoded_token = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
-      @current_user_id = decoded_token[0]['id']
-    rescue JWT::DecodeError
-      render json: { message: 'Invalid token.' }, status: :unauthorized
-    end
-  end
 end

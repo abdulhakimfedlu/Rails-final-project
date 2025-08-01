@@ -32,21 +32,7 @@ class Api::EmployeesController < ApplicationController
     employee = Employee.new(employee_params)
 
     if employee.save
-      formatted_employee = {
-        _id: employee.id,
-        name: employee.name,
-        phone: employee.phone,
-        image: employee.image,
-        position: employee.position,
-        salary: employee.salary,
-        dateHired: employee.date_hired,
-        description: employee.description,
-        workingHour: employee.working_hour,
-        tableAssigned: employee.table_assigned,
-        status: employee.status,
-        reasonForLeaving: employee.reason_for_leaving
-      }
-      render json: formatted_employee, status: :created
+      render json: format_employee(employee), status: :created
     else
       render json: { errors: employee.errors }, status: :unprocessable_entity
     end
@@ -54,59 +40,19 @@ class Api::EmployeesController < ApplicationController
 
   # Get all employees
   def index
-    employees = Employee.all.map do |employee|
-      {
-        _id: employee.id,
-        name: employee.name,
-        phone: employee.phone,
-        image: employee.image,
-        position: employee.position,
-        salary: employee.salary,
-        dateHired: employee.date_hired,
-        description: employee.description,
-        workingHour: employee.working_hour,
-        tableAssigned: employee.table_assigned,
-        status: employee.status,
-        reasonForLeaving: employee.reason_for_leaving
-      }
-    end
+    employees = Employee.all.map { |employee| format_employee(employee) }
     render json: employees
   end
 
   # Get a single employee by ID
   def show
-    employee = Employee.find_by(id: params[:id])
-    
-    if employee.nil?
-      render json: { message: 'Employee not found' }, status: :not_found
-      return
-    end
-
-    formatted_employee = {
-      _id: employee.id,
-      name: employee.name,
-      phone: employee.phone,
-      image: employee.image,
-      position: employee.position,
-      salary: employee.salary,
-      dateHired: employee.date_hired,
-      description: employee.description,
-      workingHour: employee.working_hour,
-      tableAssigned: employee.table_assigned,
-      status: employee.status,
-      reasonForLeaving: employee.reason_for_leaving
-    }
-    render json: formatted_employee
+    employee = Employee.find(params[:id])
+    render json: format_employee(employee)
   end
 
   # Update an employee
   def update
-    employee = Employee.find_by(id: params[:id])
-    
-    if employee.nil?
-      render json: { message: 'Employee not found' }, status: :not_found
-      return
-    end
+    employee = Employee.find(params[:id])
 
     image_url = params[:image]
     
@@ -139,21 +85,7 @@ class Api::EmployeesController < ApplicationController
     end
 
     if employee.update(update_params.reject { |k, v| v.nil? && k != :table_assigned })
-      formatted_employee = {
-        _id: employee.id,
-        name: employee.name,
-        phone: employee.phone,
-        image: employee.image,
-        position: employee.position,
-        salary: employee.salary.to_i,
-        dateHired: employee.date_hired,
-        description: employee.description,
-        workingHour: employee.working_hour,
-        tableAssigned: employee.table_assigned,
-        status: employee.status,
-        reasonForLeaving: employee.reason_for_leaving
-      }
-      render json: formatted_employee
+      render json: format_employee(employee)
     else
       render json: { errors: employee.errors }, status: :unprocessable_entity
     end
@@ -161,35 +93,10 @@ class Api::EmployeesController < ApplicationController
 
   # Delete an employee
   def destroy
-    employee = Employee.find_by(id: params[:id])
-    
-    if employee.nil?
-      render json: { message: 'Employee not found' }, status: :not_found
-      return
-    end
-
+    employee = Employee.find(params[:id])
     employee.destroy
-    render json: { message: 'Employee deleted' }
+    render_success({}, 'Employee deleted')
   end
 
-  private
 
-
-
-  # Authentication middleware
-  def authenticate_user
-    token = request.headers['Authorization']&.split(' ')&.last
-    
-    if token.blank?
-      render json: { message: 'Access token required.' }, status: :unauthorized
-      return
-    end
-
-    begin
-      decoded_token = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
-      @current_user_id = decoded_token[0]['id']
-    rescue JWT::DecodeError
-      render json: { message: 'Invalid token.' }, status: :unauthorized
-    end
-  end
 end

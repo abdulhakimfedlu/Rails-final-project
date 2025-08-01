@@ -6,11 +6,7 @@ class Api::CategoriesController < ApplicationController
     category = Category.new(name: params[:name])
     
     if category.save
-      formatted_category = {
-        _id: category.id,
-        name: category.name
-      }
-      render json: formatted_category, status: :created
+      render json: format_category(category), status: :created
     else
       render json: { errors: category.errors }, status: :unprocessable_entity
     end
@@ -18,26 +14,16 @@ class Api::CategoriesController < ApplicationController
 
   # Get all categories
   def index
-    categories = Category.all.map do |category|
-      {
-        _id: category.id,
-        name: category.name
-      }
-    end
+    categories = Category.all.map { |category| format_category(category) }
     render json: categories, status: :ok
   end
 
   # Update a category by ID
   def update
-    category = Category.find_by(id: params[:id])
-    
-    if category.nil?
-      render json: { message: 'Category not found' }, status: :not_found
-      return
-    end
+    category = Category.find(params[:id])
 
     if category.update(name: params[:name])
-      render json: { name: category.name }, status: :ok
+      render json: format_category(category), status: :ok
     else
       render json: { errors: category.errors }, status: :unprocessable_entity
     end
@@ -45,36 +31,14 @@ class Api::CategoriesController < ApplicationController
 
   # Delete a category by ID
   def destroy
-    category = Category.find_by(id: params[:id])
-    
-    if category.nil?
-      render json: { message: 'Category not found' }, status: :not_found
-      return
-    end
+    category = Category.find(params[:id])
 
     # Delete all menu items under this category first
     Menu.where(category: category).destroy_all
     category.destroy
     
-    render json: { message: 'Category and related menu items deleted' }, status: :ok
+    render_success({}, 'Category and related menu items deleted')
   end
 
-  private
 
-  # Authentication middleware
-  def authenticate_user
-    token = request.headers['Authorization']&.split(' ')&.last
-    
-    if token.blank?
-      render json: { message: 'Access token required.' }, status: :unauthorized
-      return
-    end
-
-    begin
-      decoded_token = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
-      @current_user_id = decoded_token[0]['id']
-    rescue JWT::DecodeError
-      render json: { message: 'Invalid token.' }, status: :unauthorized
-    end
-  end
 end
