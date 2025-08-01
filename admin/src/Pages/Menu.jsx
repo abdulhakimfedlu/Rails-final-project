@@ -562,23 +562,12 @@ const Menu = () => {
 
       {/* Category Modal */}
       {showCatModal && (
-        <div
-          className="fixed z-10 inset-0 overflow-y-auto"
-          aria-labelledby="modal-title"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div className="relative z-10">
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={closeCatModal}></div>
+          <div className="fixed inset-0 flex items-center justify-center p-4">
             <div
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity duration-300"
-              aria-hidden="true"
-              onClick={closeCatModal}
-            ></div>
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-            ></span>
-            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+              className="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all w-full max-w-lg"
+            >
               <div className="absolute top-0 right-0 pt-4 pr-4">
                 <button
                   type="button"
@@ -654,23 +643,10 @@ const Menu = () => {
 
       {/* Menu Modal */}
       {showMenuModal && (
-        <div
-          className="fixed z-10 inset-0 overflow-y-auto"
-          aria-labelledby="menu-modal-title"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity duration-300"
-              aria-hidden="true"
-              onClick={closeMenuModal}
-            ></div>
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-            ></span>
-            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full sm:p-6">
+        <div className="relative z-10">
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={closeMenuModal}></div>
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <div className="relative w-full max-w-xl p-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
               <div className="absolute top-0 right-0 pt-4 pr-4">
                 <button
                   type="button"
