@@ -411,8 +411,6 @@ const Home = () => {
 
       {/* Footer */}
       <Footer />
-      {/* Custom CSS for animations */}
-      {/* Moved to index.css: .animate-float { animation: float 4s ease-in-out infinite; } @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(180deg); } } */}
     </div>
   )
 }
