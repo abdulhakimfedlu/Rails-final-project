@@ -20,7 +20,12 @@ class Api::CategoriesController < ApplicationController
 
   # Update a category by ID
   def update
-    category = Category.find(params[:id])
+    category = Category.find_by(id: params[:id])
+    
+    if category.nil?
+      render json: { message: 'Category not found' }, status: :not_found
+      return
+    end
 
     if category.update(name: params[:name])
       render json: format_category(category), status: :ok
@@ -31,7 +36,12 @@ class Api::CategoriesController < ApplicationController
 
   # Delete a category by ID
   def destroy
-    category = Category.find(params[:id])
+    category = Category.find_by(id: params[:id])
+    
+    if category.nil?
+      render json: { message: 'Category not found' }, status: :not_found
+      return
+    end
 
     # Delete all menu items under this category first
     Menu.where(category: category).destroy_all

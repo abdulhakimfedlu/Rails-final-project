@@ -3,7 +3,6 @@ module ErrorHandler
 
   included do
     rescue_from StandardError, with: :handle_standard_error
-    rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
     rescue_from ActiveRecord::RecordInvalid, with: :record_invalid
   end
 

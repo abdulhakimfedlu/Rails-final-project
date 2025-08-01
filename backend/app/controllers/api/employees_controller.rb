@@ -46,13 +46,24 @@ class Api::EmployeesController < ApplicationController
 
   # Get a single employee by ID
   def show
-    employee = Employee.find(params[:id])
+    employee = Employee.find_by(id: params[:id])
+    
+    if employee.nil?
+      render json: { message: 'Employee not found' }, status: :not_found
+      return
+    end
+    
     render json: format_employee(employee)
   end
 
   # Update an employee
   def update
-    employee = Employee.find(params[:id])
+    employee = Employee.find_by(id: params[:id])
+    
+    if employee.nil?
+      render json: { message: 'Employee not found' }, status: :not_found
+      return
+    end
 
     image_url = params[:image]
     
@@ -93,7 +104,13 @@ class Api::EmployeesController < ApplicationController
 
   # Delete an employee
   def destroy
-    employee = Employee.find(params[:id])
+    employee = Employee.find_by(id: params[:id])
+    
+    if employee.nil?
+      render json: { message: 'Employee not found' }, status: :not_found
+      return
+    end
+    
     employee.destroy
     render_success({}, 'Employee deleted')
   end

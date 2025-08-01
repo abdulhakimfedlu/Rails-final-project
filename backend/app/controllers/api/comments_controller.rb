@@ -29,7 +29,7 @@ class Api::CommentsController < ApplicationController
     if new_comment.save
       render_success({ comment: format_comment(new_comment) }, 'Comment submitted successfully', :created)
     else
-      render_error('Failed to submit comment', :unprocessable_entity, new_comment.errors.full_messages)
+      render_error('Failed to submit comment', :internal_server_error, new_comment.errors.full_messages)
     end
   end
 

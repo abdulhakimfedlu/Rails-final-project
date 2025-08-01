@@ -3,7 +3,12 @@ class Api::MenusController < ApplicationController
   
   # Update a menu item
   def update
-    menu = Menu.find(params[:id])
+    menu = Menu.find_by(id: params[:id])
+    
+    if menu.nil?
+      render json: { message: 'Menu item not found' }, status: :not_found
+      return
+    end
 
     image_url = params[:image]
     
@@ -48,7 +53,13 @@ class Api::MenusController < ApplicationController
 
   # Delete a menu item
   def destroy
-    menu = Menu.find(params[:id])
+    menu = Menu.find_by(id: params[:id])
+    
+    if menu.nil?
+      render json: { message: 'Menu item not found' }, status: :not_found
+      return
+    end
+    
     menu.destroy
     render_success({}, 'Menu item deleted')
   end
