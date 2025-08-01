@@ -28,6 +28,7 @@ const useAuthStore = create(set => ({
       set({ token, user, loading: false, error: '' })
       return true
     } catch (err) {
+      console.error('Login error:', err)
       set({
         error: err.response?.data?.message || 'Login failed',
         loading: false,

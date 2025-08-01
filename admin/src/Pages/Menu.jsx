@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import useMenuStore from '../stores/menuStore'
+import useAuthStore from '../stores/authStore'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
@@ -82,17 +83,18 @@ const Menu = () => {
     try {
       if (catModalType === 'add') {
         await addCategory(catForm.name)
-        setCatActionMsg('Category added!')
+        setCatActionMsg('Category added successfully!')
       } else {
         await updateCategory(catForm._id, catForm.name)
-        setCatActionMsg('Category updated!')
+        setCatActionMsg('Category updated successfully!')
       }
       closeCatModal()
-    } catch {
-      setCatActionMsg('Error saving category')
+    } catch (error) {
+      console.error('Category operation error:', error)
+      setCatActionMsg(error.message || 'Error saving category')
     } finally {
       setCatActionLoading(false)
-      setTimeout(() => setCatActionMsg(''), 1500)
+      setTimeout(() => setCatActionMsg(''), 3000)
     }
   }
   const openMenuModal = (
@@ -181,17 +183,18 @@ const Menu = () => {
       }
       if (menuModalType === 'add') {
         await addMenuItem(menuForm.category, formData)
-        setMenuActionMsg('Menu item added!')
+        setMenuActionMsg('Menu item added successfully!')
       } else {
         await updateMenuItem(menuForm._id, formData)
-        setMenuActionMsg('Menu item updated!')
+        setMenuActionMsg('Menu item updated successfully!')
       }
       closeMenuModal()
-    } catch {
-      setMenuActionMsg('Error saving menu item')
+    } catch (error) {
+      console.error('Menu item operation error:', error)
+      setMenuActionMsg(error.message || 'Error saving menu item')
     } finally {
       setMenuActionLoading(false)
-      setTimeout(() => setMenuActionMsg(''), 1500)
+      setTimeout(() => setMenuActionMsg(''), 3000)
     }
   }
   const handleMenuDelete = async id => {
@@ -199,12 +202,13 @@ const Menu = () => {
     setMenuActionLoading(true)
     try {
       await deleteMenuItem(id)
-      setMenuActionMsg('Menu item deleted!')
-    } catch {
-      setMenuActionMsg('Error deleting menu item')
+      setMenuActionMsg('Menu item deleted successfully!')
+    } catch (error) {
+      console.error('Menu item delete error:', error)
+      setMenuActionMsg(error.message || 'Error deleting menu item')
     } finally {
       setMenuActionLoading(false)
-      setTimeout(() => setMenuActionMsg(''), 1500)
+      setTimeout(() => setMenuActionMsg(''), 3000)
     }
   }
   const openDetailModal = async item => {
@@ -212,8 +216,12 @@ const Menu = () => {
     setDetailItem(item)
     setShowDetailModal(true)
     try {
+      const { token } = useAuthStore.getState()
       const res = await axios.get(
-        `${BACKEND_URL}/rating/menu/${item._id}/average`
+        `${BACKEND_URL}/rating/menu/${item._id}/average`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       )
       if (typeof res.data === 'object' && res.data !== null) {
         setDetailRating({
@@ -223,7 +231,8 @@ const Menu = () => {
       } else {
         setDetailRating({ count: 0, avg: 0 })
       }
-    } catch {
+    } catch (error) {
+      console.error('Error fetching rating:', error)
       setDetailRating({ count: 0, avg: 0 })
     } finally {
       setDetailLoading(false)
@@ -304,11 +313,61 @@ const Menu = () => {
         <div className="flex-1 min-h-0 overflow-y-auto">
           {catActionMsg && (
             <div className="mb-6">
-              <div className="rounded-md bg-green-50 p-3 sm:p-4 shadow-sm">
+              <div
+                className={`rounded-md p-3 sm:p-4 shadow-sm ${
+                  catActionMsg.includes('Error') ||
+                  catActionMsg.includes('error')
+                    ? 'bg-red-50 border-l-4 border-red-500'
+                    : 'bg-green-50 border-l-4 border-green-500'
+                }`}
+              >
                 <div className="flex items-center">
-                  <Check className="h-5 w-5 text-green-400" />
-                  <p className="ml-3 text-sm font-medium text-green-800">
+                  {catActionMsg.includes('Error') ||
+                  catActionMsg.includes('error') ? (
+                    <X className="h-5 w-5 text-red-400" />
+                  ) : (
+                    <Check className="h-5 w-5 text-green-400" />
+                  )}
+                  <p
+                    className={`ml-3 text-sm font-medium ${
+                      catActionMsg.includes('Error') ||
+                      catActionMsg.includes('error')
+                        ? 'text-red-800'
+                        : 'text-green-800'
+                    }`}
+                  >
                     {catActionMsg}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          {menuActionMsg && (
+            <div className="mb-6">
+              <div
+                className={`rounded-md p-3 sm:p-4 shadow-sm ${
+                  menuActionMsg.includes('Error') ||
+                  menuActionMsg.includes('error')
+                    ? 'bg-red-50 border-l-4 border-red-500'
+                    : 'bg-green-50 border-l-4 border-green-500'
+                }`}
+              >
+                <div className="flex items-center">
+                  {menuActionMsg.includes('Error') ||
+                  menuActionMsg.includes('error') ? (
+                    <X className="h-5 w-5 text-red-400" />
+                  ) : (
+                    <Check className="h-5 w-5 text-green-400" />
+                  )}
+                  <p
+                    className={`ml-3 text-sm font-medium ${
+                      menuActionMsg.includes('Error') ||
+                      menuActionMsg.includes('error')
+                        ? 'text-red-800'
+                        : 'text-green-800'
+                    }`}
+                  >
+                    {menuActionMsg}
                   </p>
                 </div>
               </div>
@@ -351,12 +410,15 @@ const Menu = () => {
                         setCatActionLoading(true)
                         try {
                           await deleteCategory(selectedCategory)
-                          setCatActionMsg('Category deleted!')
-                        } catch {
-                          setCatActionMsg('Error deleting category')
+                          setCatActionMsg('Category deleted successfully!')
+                        } catch (error) {
+                          console.error('Category delete error:', error)
+                          setCatActionMsg(
+                            error.message || 'Error deleting category'
+                          )
                         } finally {
                           setCatActionLoading(false)
-                          setTimeout(() => setCatActionMsg(''), 1500)
+                          setTimeout(() => setCatActionMsg(''), 3000)
                         }
                       }
                     }}
