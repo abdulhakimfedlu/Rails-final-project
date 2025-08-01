@@ -1,25 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import useMenuStore from '../stores/menuStore'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 const OutOfStock = () => {
+  const { updateMenuItem } = useMenuStore()
   const [categories, setCategories] = useState([])
   const [outOfStockItems, setOutOfStockItems] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editForm, setEditForm] = useState({
-    name: '',
-    price: '',
-    ingredients: '',
-    badge: '',
-    image: '',
-    _id: null,
-    outOfStock: true,
-  })
-  const [editLoading, setEditLoading] = useState(false)
-  const [editMsg, setEditMsg] = useState('')
+  const [updatingId, setUpdatingId] = useState(null)
+  const [statusMsg, setStatusMsg] = useState('')
 
   useEffect(() => {
     const fetchOutOfStock = async () => {
@@ -49,50 +41,43 @@ const OutOfStock = () => {
     fetchOutOfStock()
   }, [])
 
-  const handleEditClick = item => {
-    setEditForm({ ...item })
-    setShowEditModal(true)
-  }
-  const closeEditModal = () => {
-    setShowEditModal(false)
-    setEditForm({
-      name: '',
-      price: '',
-      ingredients: '',
-      badge: '',
-      image: '',
-      _id: null,
-      outOfStock: true,
-    })
-    setEditMsg('')
-  }
-  const handleEditFormChange = e => {
-    const { name, value, type, checked } = e.target
-    setEditForm({
-      ...editForm,
-      [name]: type === 'checkbox' ? checked : value,
-    })
-  }
-  const handleEditSubmit = async e => {
-    e.preventDefault()
-    setEditLoading(true)
+  const toggleStockStatus = async (item) => {
     try {
-      await axios.put(`${BACKEND_URL}/menus/${editForm._id}`, {
-        ...editForm,
-        price: parseFloat(editForm.price),
-        outOfStock: !!editForm.outOfStock,
+      setUpdatingId(item._id)
+      setStatusMsg('')
+      
+      // Toggle the outOfStock status
+      const updatedItem = { ...item, outOfStock: !item.outOfStock }
+      const formData = new FormData()
+      Object.entries(updatedItem).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(key, value)
+        }
       })
-      setEditMsg('Menu item updated!')
+      
+      await updateMenuItem(item._id, formData)
+      
+      // Update local state to reflect the change
+      const updatedItems = { ...outOfStockItems }
+      Object.keys(updatedItems).forEach(categoryId => {
+        updatedItems[categoryId] = updatedItems[categoryId].filter(
+          i => i._id !== item._id
+        )
+      })
+      
+      setOutOfStockItems(updatedItems)
+      setStatusMsg(`"${item.name}" marked as ${updatedItem.outOfStock ? 'out of stock' : 'in stock'}`)
+      
+      // Clear status message after 3 seconds
       setTimeout(() => {
-        setEditMsg('')
-        closeEditModal()
-        // Refresh out-of-stock list
-        window.location.reload()
-      }, 1000)
-    } catch {
-      setEditMsg('Error updating menu item')
+        setStatusMsg('')
+      }, 3000)
+      
+    } catch (error) {
+      console.error('Error updating stock status:', error)
+      setError('Failed to update stock status')
     } finally {
-      setEditLoading(false)
+      setUpdatingId(null)
     }
   }
 
@@ -149,10 +134,17 @@ const OutOfStock = () => {
                   />
                 )}
                 <button
-                  onClick={() => handleEditClick(item)}
-                  className="absolute top-2 right-2 px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs sm:text-sm"
+                  onClick={() => toggleStockStatus(item)}
+                  disabled={updatingId === item._id}
+                  className={`absolute top-2 right-2 px-2 py-1 rounded text-xs sm:text-sm ${
+                    item.outOfStock 
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                      : 'bg-red-100 text-red-700 hover:bg-red-200'
+                  }`}
                 >
-                  Edit
+                  {updatingId === item._id 
+                    ? 'Updating...' 
+                    : item.outOfStock ? 'Mark In Stock' : 'Mark Out of Stock'}
                 </button>
               </div>
             ))
@@ -163,87 +155,9 @@ const OutOfStock = () => {
           </div>
         )}
       </div>
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 w-full max-w-md sm:max-w-lg relative">
-            <button
-              onClick={closeEditModal}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg sm:text-xl"
-            >
-              ×
-            </button>
-            <h2 className="text-lg sm:text-xl font-bold mb-4 text-pink-700">
-              Edit Menu Item
-            </h2>
-            <form onSubmit={handleEditSubmit}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <input
-                  type="text"
-                  name="name"
-                  value={editForm.name}
-                  onChange={handleEditFormChange}
-                  placeholder="Item Name"
-                  className="border rounded px-3 py-2 text-sm sm:text-base focus:outline-pink-400"
-                  required
-                />
-                <input
-                  type="number"
-                  name="price"
-                  value={editForm.price}
-                  onChange={handleEditFormChange}
-                  placeholder="Price"
-                  className="border rounded px-3 py-2 text-sm sm:text-base focus:outline-pink-400"
-                  required
-                />
-                <input
-                  type="text"
-                  name="badge"
-                  value={editForm.badge}
-                  onChange={handleEditFormChange}
-                  placeholder="Badge (optional)"
-                  className="border rounded px-3 py-2 text-sm sm:text-base focus:outline-pink-400"
-                />
-                <input
-                  type="text"
-                  name="image"
-                  value={editForm.image}
-                  onChange={handleEditFormChange}
-                  placeholder="Image URL (optional)"
-                  className="border rounded px-3 py-2 text-sm sm:text-base focus:outline-pink-400"
-                />
-                <label className="flex items-center col-span-1 sm:col-span-2">
-                  <input
-                    type="checkbox"
-                    name="outOfStock"
-                    checked={!!editForm.outOfStock}
-                    onChange={handleEditFormChange}
-                    className="mr-2"
-                  />
-                  <span className="text-sm sm:text-base">Out of Stock</span>
-                </label>
-                <textarea
-                  name="ingredients"
-                  value={editForm.ingredients}
-                  onChange={handleEditFormChange}
-                  placeholder="Ingredients"
-                  className="border rounded px-3 py-2 col-span-1 sm:col-span-2 text-sm sm:text-base focus:outline-pink-400"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={editLoading}
-                className="w-full mt-4 bg-pink-600 hover:bg-pink-700 text-white py-2 rounded font-semibold transition text-sm sm:text-base"
-              >
-                {editLoading ? 'Saving...' : 'Update'}
-              </button>
-              {editMsg && (
-                <div className="mt-2 text-center text-green-600 text-sm sm:text-base">
-                  {editMsg}
-                </div>
-              )}
-            </form>
-          </div>
+      {statusMsg && (
+        <div className="fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {statusMsg}
         </div>
       )}
     </div>
