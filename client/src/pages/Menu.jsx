@@ -289,7 +289,6 @@ const Menu = () => {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   )
 }
