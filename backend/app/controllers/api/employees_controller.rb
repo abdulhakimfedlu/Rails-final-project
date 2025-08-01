@@ -44,9 +44,7 @@ class Api::EmployeesController < ApplicationController
         workingHour: employee.working_hour,
         tableAssigned: employee.table_assigned,
         status: employee.status,
-        reasonForLeaving: employee.reason_for_leaving,
-        created_at: employee.created_at,
-        updated_at: employee.updated_at
+        reasonForLeaving: employee.reason_for_leaving
       }
       render json: formatted_employee, status: :created
     else
@@ -69,9 +67,7 @@ class Api::EmployeesController < ApplicationController
         workingHour: employee.working_hour,
         tableAssigned: employee.table_assigned,
         status: employee.status,
-        reasonForLeaving: employee.reason_for_leaving,
-        created_at: employee.created_at,
-        updated_at: employee.updated_at
+        reasonForLeaving: employee.reason_for_leaving
       }
     end
     render json: employees
@@ -98,9 +94,7 @@ class Api::EmployeesController < ApplicationController
       workingHour: employee.working_hour,
       tableAssigned: employee.table_assigned,
       status: employee.status,
-      reasonForLeaving: employee.reason_for_leaving,
-      created_at: employee.created_at,
-      updated_at: employee.updated_at
+      reasonForLeaving: employee.reason_for_leaving
     }
     render json: formatted_employee
   end
@@ -157,9 +151,7 @@ class Api::EmployeesController < ApplicationController
         workingHour: employee.working_hour,
         tableAssigned: employee.table_assigned,
         status: employee.status,
-        reasonForLeaving: employee.reason_for_leaving,
-        created_at: employee.created_at,
-        updated_at: employee.updated_at
+        reasonForLeaving: employee.reason_for_leaving
       }
       render json: formatted_employee
     else

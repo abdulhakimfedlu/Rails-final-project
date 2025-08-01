@@ -30,9 +30,7 @@ class Api::RatingsController < ApplicationController
       {
         _id: rating.id,
         menu_id: rating.menu_id,
-        stars: rating.stars,
-        created_at: rating.created_at,
-        updated_at: rating.updated_at
+        stars: rating.stars
       }
     end
     render json: ratings

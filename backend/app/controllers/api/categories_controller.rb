@@ -8,9 +8,7 @@ class Api::CategoriesController < ApplicationController
     if category.save
       formatted_category = {
         _id: category.id,
-        name: category.name,
-        created_at: category.created_at,
-        updated_at: category.updated_at
+        name: category.name
       }
       render json: formatted_category, status: :created
     else

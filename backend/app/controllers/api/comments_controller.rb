@@ -36,9 +36,7 @@ class Api::CommentsController < ApplicationController
         name: new_comment.name,
         phone: new_comment.phone,
         comment: new_comment.comment,
-        anonymous: new_comment.anonymous,
-        createdAt: new_comment.created_at,
-        updatedAt: new_comment.updated_at
+        anonymous: new_comment.anonymous
       }
       render json: { 
         success: true, 
@@ -68,9 +66,7 @@ class Api::CommentsController < ApplicationController
         name: comment.name,
         phone: comment.phone,
         comment: comment.comment,
-        anonymous: comment.anonymous,
-        createdAt: comment.created_at,
-        updatedAt: comment.updated_at
+        anonymous: comment.anonymous
       }
     end
     render json: { success: true, comments: comments }, status: :ok

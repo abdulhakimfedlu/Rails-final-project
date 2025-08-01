@@ -54,9 +54,7 @@ class Api::MenusController < ApplicationController
         available: menu.available,
         outOfStock: menu.out_of_stock,
         badge: menu.badge,
-        category_id: menu.category_id,
-        created_at: menu.created_at,
-        updated_at: menu.updated_at
+        category_id: menu.category_id
       }
       render json: formatted_menu
     else
@@ -90,9 +88,7 @@ class Api::MenusController < ApplicationController
         available: menu.available,
         outOfStock: menu.out_of_stock,
         badge: menu.badge,
-        category_id: menu.category_id,
-        created_at: menu.created_at,
-        updated_at: menu.updated_at
+        category_id: menu.category_id
       }
     end
     render json: formatted_menus
@@ -130,9 +126,7 @@ class Api::MenusController < ApplicationController
         available: menu.available,
         outOfStock: menu.out_of_stock,
         badge: menu.badge,
-        category_id: menu.category_id,
-        created_at: menu.created_at,
-        updated_at: menu.updated_at
+        category_id: menu.category_id
       }
       render json: formatted_menu, status: :created
     else
