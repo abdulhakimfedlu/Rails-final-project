@@ -3,21 +3,16 @@ class Api::RatingsController < ApplicationController
   
   # Create a new rating
   def create
-    menu = params[:menu]
-    stars = params[:stars]
-
-    if menu.blank? || stars.blank?
-      render json: { message: 'Menu and stars are required.' }, status: :bad_request
-      return
-    end
+    validate_required_params({ menu: params[:menu], stars: params[:stars] })
+    return if performed?
 
     rating = Rating.new(
-      menu_id: menu,
-      stars: stars
+      menu_id: params[:menu],
+      stars: params[:stars]
     )
 
     if rating.save
-      render json: rating, status: :created
+      render json: format_rating(rating), status: :created
     else
       render json: { errors: rating.errors }, status: :unprocessable_entity
     end
@@ -26,13 +21,7 @@ class Api::RatingsController < ApplicationController
   # Get all ratings for a menu item
   def by_menu
     menu_id = params[:menu_id]
-    ratings = Rating.where(menu_id: menu_id).map do |rating|
-      {
-        _id: rating.id,
-        menu_id: rating.menu_id,
-        stars: rating.stars
-      }
-    end
+    ratings = Rating.where(menu_id: menu_id).map { |rating| format_rating(rating) }
     render json: ratings
   end
 
@@ -55,22 +44,5 @@ class Api::RatingsController < ApplicationController
     end
   end
 
-  private
 
-  # Authentication middleware
-  def authenticate_user
-    token = request.headers['Authorization']&.split(' ')&.last
-    
-    if token.blank?
-      render json: { message: 'Access token required.' }, status: :unauthorized
-      return
-    end
-
-    begin
-      decoded_token = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
-      @current_user_id = decoded_token[0]['id']
-    rescue JWT::DecodeError
-      render json: { message: 'Invalid token.' }, status: :unauthorized
-    end
-  end
 end

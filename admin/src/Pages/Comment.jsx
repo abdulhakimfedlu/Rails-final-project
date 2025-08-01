@@ -68,10 +68,6 @@ const Comment = () => {
           <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
             Community Comments
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Join the conversation and share your thoughts with our amazing
-            community
-          </p>
           <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto mt-6"></div>
         </div>
 

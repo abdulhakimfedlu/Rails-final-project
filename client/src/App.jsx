@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import Menu from './pages/Menu'
 import ContactUs from './pages/ContactUs'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 import About from './pages/About'
 
 const App = () => {
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/about" element={<About />} />
       </Routes>
+      <Footer />
     </div>
   )
 }
