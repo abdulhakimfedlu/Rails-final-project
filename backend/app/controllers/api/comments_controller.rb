@@ -36,9 +36,7 @@ class Api::CommentsController < ApplicationController
         name: new_comment.name,
         phone: new_comment.phone,
         comment: new_comment.comment,
-        anonymous: new_comment.anonymous,
-        createdAt: new_comment.created_at,
-        updatedAt: new_comment.updated_at
+        anonymous: new_comment.anonymous
       }
       render json: { 
         success: true, 
@@ -68,9 +66,7 @@ class Api::CommentsController < ApplicationController
         name: comment.name,
         phone: comment.phone,
         comment: comment.comment,
-        anonymous: comment.anonymous,
-        createdAt: comment.created_at,
-        updatedAt: comment.updated_at
+        anonymous: comment.anonymous
       }
     end
     render json: { success: true, comments: comments }, status: :ok
@@ -94,7 +90,7 @@ class Api::CommentsController < ApplicationController
     end
 
     begin
-      decoded_token = JWT.decode(token, ENV['JWT_SECRET'] || 'your_jwt_secret', true, { algorithm: 'HS256' })
+      decoded_token = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
       @current_user_id = decoded_token[0]['id']
     rescue JWT::DecodeError
       render json: { message: 'Invalid token.' }, status: :unauthorized

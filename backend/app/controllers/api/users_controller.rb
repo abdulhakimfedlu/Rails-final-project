@@ -169,7 +169,7 @@ class Api::UsersController < ApplicationController
     end
 
     begin
-      decoded_token = JWT.decode(token, ENV['JWT_SECRET'] || 'your_jwt_secret', true, { algorithm: 'HS256' })
+      decoded_token = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
       @current_user_id = decoded_token[0]['id']
     rescue JWT::DecodeError
       render json: { message: 'Invalid token.' }, status: :unauthorized

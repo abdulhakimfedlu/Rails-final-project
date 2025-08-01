@@ -8,9 +8,7 @@ class Api::CategoriesController < ApplicationController
     if category.save
       formatted_category = {
         _id: category.id,
-        name: category.name,
-        created_at: category.created_at,
-        updated_at: category.updated_at
+        name: category.name
       }
       render json: formatted_category, status: :created
     else
@@ -23,9 +21,7 @@ class Api::CategoriesController < ApplicationController
     categories = Category.all.map do |category|
       {
         _id: category.id,
-        name: category.name,
-        created_at: category.created_at,
-        updated_at: category.updated_at
+        name: category.name
       }
     end
     render json: categories, status: :ok
@@ -41,13 +37,7 @@ class Api::CategoriesController < ApplicationController
     end
 
     if category.update(name: params[:name])
-      formatted_category = {
-        _id: category.id,
-        name: category.name,
-        created_at: category.created_at,
-        updated_at: category.updated_at
-      }
-      render json: formatted_category, status: :ok
+      render json: { name: category.name }, status: :ok
     else
       render json: { errors: category.errors }, status: :unprocessable_entity
     end
@@ -81,7 +71,7 @@ class Api::CategoriesController < ApplicationController
     end
 
     begin
-      decoded_token = JWT.decode(token, ENV['JWT_SECRET'] || 'your_jwt_secret', true, { algorithm: 'HS256' })
+      decoded_token = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
       @current_user_id = decoded_token[0]['id']
     rescue JWT::DecodeError
       render json: { message: 'Invalid token.' }, status: :unauthorized

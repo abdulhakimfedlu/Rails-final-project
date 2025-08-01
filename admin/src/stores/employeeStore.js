@@ -4,6 +4,38 @@ import useAuthStore from './authStore'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
+// Create axios instance with interceptors
+const api = axios.create({
+  baseURL: BACKEND_URL,
+})
+
+// Add request interceptor to include token
+api.interceptors.request.use(
+  (config) => {
+    const { token } = useAuthStore.getState()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Add response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid, logout user
+      useAuthStore.getState().logout()
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
 const initialForm = {
   name: '',
   phone: '',
@@ -34,15 +66,13 @@ export const useEmployeeStore = create((set, get) => ({
   resetForm: () => set({ form: initialForm, editId: null }),
 
   fetchEmployees: async () => {
-    set({ loading: true })
+    set({ loading: true, error: null })
     try {
-      const { token } = useAuthStore.getState()
-      const res = await axios.get(`${BACKEND_URL}/employees/`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
+      const res = await api.get('/employees/')
       set({ employees: res.data, error: null })
-    } catch {
-      set({ error: 'Failed to fetch employees' })
+    } catch (error) {
+      console.error('Error fetching employees:', error)
+      set({ error: error.response?.data?.message || 'Failed to fetch employees' })
     } finally {
       set({ loading: false })
     }
@@ -75,30 +105,28 @@ export const useEmployeeStore = create((set, get) => ({
     set({ actionLoading: true })
     const { form, editId, fetchEmployees, setShowForm } = get()
     try {
-      const { token } = useAuthStore.getState()
       const formData = new FormData()
       Object.entries(form).forEach(([key, value]) => {
         if (value !== undefined && value !== null) formData.append(key, value)
       })
       if (editId) {
-        await axios.put(`${BACKEND_URL}/employees/${editId}`, formData, {
+        await api.put(`/employees/${editId}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
         })
       } else {
-        await axios.post(`${BACKEND_URL}/employees/`, formData, {
+        await api.post('/employees/', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
         })
       }
       setShowForm(false)
       fetchEmployees()
-    } catch {
-      alert('Failed to save employee')
+    } catch (error) {
+      console.error('Error saving employee:', error)
+      alert(error.response?.data?.message || 'Failed to save employee')
     } finally {
       set({ actionLoading: false })
     }
@@ -109,13 +137,11 @@ export const useEmployeeStore = create((set, get) => ({
     set({ actionLoading: true })
     const { fetchEmployees } = get()
     try {
-      const { token } = useAuthStore.getState()
-      await axios.delete(`${BACKEND_URL}/employees/${id}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
+      await api.delete(`/employees/${id}`)
       fetchEmployees()
-    } catch {
-      alert('Failed to delete employee')
+    } catch (error) {
+      console.error('Error deleting employee:', error)
+      alert(error.response?.data?.message || 'Failed to delete employee')
     } finally {
       set({ actionLoading: false })
     }
